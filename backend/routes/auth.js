@@ -15,11 +15,11 @@ const generateToken = (user) => {
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Validation
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required.' });
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Username, email, and password are required.' });
     }
 
     if (username.length < 3) {
@@ -30,15 +30,25 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 6 characters.' });
     }
 
-    // Check if user exists
-    const existingUser = await User.findOne({ username: username.toLowerCase() });
+    // Check if user exists (by username or email)
+    const existingUser = await User.findOne({ 
+      $or: [
+        { username: username.toLowerCase() },
+        { email: email.toLowerCase() }
+      ]
+    });
+    
     if (existingUser) {
+      if (existingUser.email === email.toLowerCase()) {
+        return res.status(400).json({ message: 'Email already registered.' });
+      }
       return res.status(400).json({ message: 'Username already taken.' });
     }
 
     // Create user
     const user = await User.create({
       username: username.toLowerCase(),
+      email: email.toLowerCase(),
       password
     });
 

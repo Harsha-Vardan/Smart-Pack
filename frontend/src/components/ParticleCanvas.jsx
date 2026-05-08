@@ -78,7 +78,7 @@ export default function ParticleCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      id="particleCanvas"
+      className="fixed inset-0 z-0 pointer-events-none"
     />
   );
 }
